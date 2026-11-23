@@ -4,11 +4,11 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>BlueTalk Beta</title>
-  <meta name="description" content="Descarga la versión beta de BlueTalk, comunicación aumentativa para niñas y niños autistas.">
-  <meta name="theme-color" content="#238EE7">
+  <meta name="description" content="Descarga la beta de BlueTalk, comunicación aumentativa para niñas y niños autistas. Pronto en Google Play.">
+  <meta name="theme-color" content="#1574C1">
   <link rel="icon" href="logo.png">
   <style>
-    /* Paleta «celeste» y «oscuro» de la app: lib/core/theme/app_colors.dart */
+    /* Paletas «celeste» y «oscuro» de la app: lib/core/theme/app_colors.dart */
     @font-face {
       font-family: "Nunito";
       src: url("Nunito-Variable.ttf") format("truetype");
@@ -22,15 +22,21 @@
       --primary-ink: #FFFFFF;
       --primary-strong: #0F5E9C;
       --header: #238EE7;
-      --on-header: #FFFFFF;
       --text: #263442;
       --muted: #56657A;
       --accent: #37BEA7;
+      --on-accent: #0A3B2E;
       --border: #DCE3EA;
+      --soft: #E8F2FB;
       --aviso: #FBEBC8;
       --on-aviso: #5B4413;
       --ok: #DDF3E4;
       --on-ok: #14522E;
+      --error: #FBE0E0;
+      --on-error: #6E1F1F;
+      --hero-a: #1574C1;
+      --hero-b: #0F5E9C;
+      --sombra: 0 10px 30px rgb(15 94 156 / .12);
     }
     @media (prefers-color-scheme: dark) {
       :root {
@@ -39,18 +45,23 @@
         --primary: #3095E8;
         --primary-ink: #171D26;
         --primary-strong: #3095E8;
-        --header: #1F2733;
-        --on-header: #E7EBEF;
         --text: #E7EBEF;
         --muted: #A9B4C2;
         --border: #2E3A4A;
+        --soft: #1C2A3A;
         --aviso: #3A3220;
         --on-aviso: #F3DFA9;
         --ok: #1D3A2A;
         --on-ok: #BFE8CD;
+        --error: #3D2224;
+        --on-error: #F5C2C2;
+        --hero-a: #1B4F80;
+        --hero-b: #13263D;
+        --sombra: 0 10px 30px rgb(0 0 0 / .35);
       }
     }
     * { box-sizing: border-box; }
+    html { scroll-behavior: smooth; scroll-padding-top: 76px; }
     body {
       margin: 0;
       background: var(--bg);
@@ -58,147 +69,456 @@
       font-family: "Nunito", system-ui, sans-serif;
       font-size: 17px;
       line-height: 1.55;
+      -webkit-font-smoothing: antialiased;
     }
+    img { max-width: 100%; height: auto; display: block; }
     a { color: var(--primary-strong); }
-    .envoltura { max-width: 960px; margin: 0 auto; padding: 0 16px; }
+    .env { max-width: 1040px; margin: 0 auto; padding: 0 16px; }
+    h2 { font-size: clamp(1.5rem, 3.6vw, 2rem); line-height: 1.2; margin: 0 0 8px; font-weight: 900; }
+    .sub { color: var(--muted); margin: 0 0 24px; }
+    section { padding: 56px 0; }
 
-    header {
-      background: var(--header);
-      color: var(--on-header);
-      padding: 14px 0;
+    /* Cabecera fija */
+    .cab {
+      position: sticky; top: 0; z-index: 10;
+      background: color-mix(in srgb, var(--surface) 88%, transparent);
+      backdrop-filter: blur(10px);
+      border-bottom: 1px solid var(--border);
     }
-    header .envoltura { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
-    .marca { display: flex; align-items: center; gap: 10px; font-weight: 800; font-size: 1.2rem; }
-    .marca img { height: 40px; width: auto; background: #FFFFFF; border-radius: 12px; padding: 4px 8px; }
-    .insignia {
-      background: var(--accent); color: #0A3B2E;
-      font-weight: 800; font-size: .8rem; letter-spacing: .06em;
-      padding: 4px 10px; border-radius: 999px; text-transform: uppercase;
+    .cab .env { display: flex; align-items: center; gap: 16px; height: 64px; }
+    .cab .logo { height: 38px; width: auto; }
+    .cab nav { margin-left: auto; display: flex; gap: 4px; }
+    .cab nav a {
+      color: var(--text); text-decoration: none; font-weight: 700;
+      padding: 10px 14px; border-radius: 12px; min-height: 44px; display: inline-flex; align-items: center;
     }
+    .cab nav a:hover { background: var(--soft); }
+    .pill {
+      display: inline-flex; align-items: center; gap: 6px;
+      font-weight: 800; font-size: .8rem; letter-spacing: .05em; text-transform: uppercase;
+      padding: 5px 12px; border-radius: 999px; white-space: nowrap;
+    }
+    .pill-beta { background: var(--accent); color: var(--on-accent); }
 
-    .portada {
-      display: grid; grid-template-columns: 1.3fr 1fr; gap: 32px; align-items: center;
-      padding: 40px 0 24px;
+    /* Portada */
+    .hero {
+      position: relative; overflow: hidden; color: #FFFFFF;
+      background:
+        radial-gradient(600px 300px at 90% 10%, rgb(55 190 167 / .35), transparent 70%),
+        radial-gradient(500px 260px at 0% 100%, rgb(35 142 231 / .45), transparent 70%),
+        linear-gradient(160deg, var(--hero-a), var(--hero-b));
+      padding: 56px 0 72px;
     }
-    h1 { font-size: clamp(2rem, 5vw, 2.8rem); line-height: 1.15; margin: 0 0 12px; font-weight: 900; }
-    h1 span { color: var(--primary-strong); }
-    .lema { font-size: 1.15rem; color: var(--muted); margin: 0 0 24px; }
-    .mascota { width: 100%; max-width: 320px; justify-self: center; }
+    .hero .env { display: grid; grid-template-columns: 1.25fr 1fr; gap: 32px; align-items: center; }
+    .hero h1 { font-size: clamp(2.1rem, 6vw, 3.4rem); line-height: 1.08; margin: 14px 0 14px; font-weight: 900; }
+    .hero h1 span { color: #BFF3E8; }
+    .hero p.lema { font-size: 1.15rem; margin: 0 0 22px; opacity: .95; max-width: 34ch; }
+    .chips { display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 26px; padding: 0; list-style: none; }
+    .chips li {
+      background: rgb(255 255 255 / .14); border: 1px solid rgb(255 255 255 / .3);
+      padding: 6px 12px; border-radius: 999px; font-weight: 700; font-size: .92rem;
+    }
+    .pill-pronto { background: var(--aviso); color: var(--on-aviso); }
+    .hero .mascota { max-width: 340px; justify-self: center; filter: drop-shadow(0 20px 30px rgb(0 0 0 / .25)); }
+    .hero .meta { margin: 12px 0 0; font-size: .95rem; opacity: .9; }
 
     .boton {
-      display: inline-flex; align-items: center; gap: 10px;
-      background: var(--primary); color: var(--primary-ink);
+      display: inline-flex; align-items: center; justify-content: center; gap: 10px;
       font-weight: 800; font-size: 1.1rem; text-decoration: none;
-      min-height: 56px; padding: 14px 26px; border-radius: 16px;
-      box-shadow: 0 6px 18px rgb(21 116 193 / .25);
+      min-height: 56px; padding: 14px 28px; border-radius: 16px;
+      transition: transform .15s ease, box-shadow .15s ease;
     }
-    .boton:hover { filter: brightness(1.08); }
-    .boton:focus-visible { outline: 3px solid var(--primary-strong); outline-offset: 3px; }
     .boton svg { width: 24px; height: 24px; flex: none; }
-    .datos-apk { margin: 10px 0 0; font-size: .95rem; color: var(--muted); }
+    .boton:hover { transform: translateY(-2px); }
+    .boton:focus-visible { outline: 3px solid var(--accent); outline-offset: 3px; }
+    .boton-claro { background: #FFFFFF; color: #0F5E9C; box-shadow: 0 10px 24px rgb(0 0 0 / .2); }
+    .boton-prim { background: var(--primary); color: var(--primary-ink); }
 
-    .tarjetas { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px; margin: 24px 0; }
-    .tarjeta {
+    /* Estado: beta y Play */
+    .estado { margin-top: -40px; position: relative; padding-top: 0; }
+    .estado-grid { display: grid; grid-template-columns: 1.4fr 1fr; gap: 16px; }
+    .card {
       background: var(--surface); border: 1px solid var(--border);
-      border-radius: 20px; padding: 22px;
+      border-radius: 22px; padding: 24px; box-shadow: var(--sombra);
     }
-    .tarjeta h2, .tarjeta h3 { margin: 0 0 8px; font-weight: 800; }
-    .tarjeta h2 { font-size: 1.35rem; }
-    .tarjeta h3 { font-size: 1.1rem; }
-    .tarjeta p { margin: 0; color: var(--muted); }
+    .linea { list-style: none; margin: 14px 0 0; padding: 0; display: grid; gap: 14px; }
+    .linea li { display: grid; grid-template-columns: 36px 1fr; gap: 12px; align-items: start; }
+    .punto {
+      width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+      font-weight: 900; font-size: .95rem;
+    }
+    .p-ok { background: var(--ok); color: var(--on-ok); }
+    .p-curso { background: var(--aviso); color: var(--on-aviso); }
+    .p-luego { background: var(--soft); color: var(--primary-strong); }
+    .linea b { display: block; }
+    .linea span { color: var(--muted); font-size: .95rem; }
+    .play {
+      display: flex; flex-direction: column; align-items: flex-start; justify-content: center; gap: 14px;
+      background: linear-gradient(160deg, var(--soft), var(--surface));
+    }
+    .play-insignia {
+      display: inline-flex; align-items: center; gap: 12px;
+      background: #000000; color: #FFFFFF; border-radius: 12px; padding: 10px 18px 10px 14px;
+      border: 1px solid #A6A6A6; opacity: .92;
+    }
+    .play-insignia svg { width: 34px; height: 34px; }
+    .play-insignia small { display: block; font-size: .7rem; letter-spacing: .04em; text-transform: uppercase; }
+    .play-insignia strong { font-size: 1.25rem; line-height: 1.1; font-weight: 700; }
+    .play p { margin: 0; color: var(--muted); }
 
-    .qr { display: grid; grid-template-columns: auto 1fr; gap: 24px; align-items: center; }
-    .qr img { width: 200px; height: 200px; background: #FFFFFF; border-radius: 16px; padding: 10px; border: 1px solid var(--border); }
-    .qr code { word-break: break-all; }
+    /* QR (solo pantallas grandes) */
+    .qr { display: grid; grid-template-columns: auto 1fr; gap: 28px; align-items: center; margin-top: 16px; }
+    .qr img { width: 180px; height: 180px; background: #FFFFFF; border-radius: 16px; padding: 10px; border: 1px solid var(--border); }
+    .qr code { color: var(--muted); word-break: break-all; }
 
-    ol.pasos { margin: 8px 0 0; padding-left: 1.3em; }
-    ol.pasos li { margin-bottom: 6px; }
+    /* Funciones */
+    .funciones { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+    .funcion { padding: 22px; }
+    .icono {
+      width: 48px; height: 48px; border-radius: 14px; display: grid; place-items: center;
+      background: var(--soft); color: var(--primary-strong); margin-bottom: 12px;
+    }
+    .icono svg { width: 26px; height: 26px; }
+    .funcion h3 { margin: 0 0 4px; font-size: 1.1rem; }
+    .funcion p { margin: 0; color: var(--muted); font-size: .97rem; }
 
-    .aviso { background: var(--aviso); color: var(--on-aviso); border-radius: 16px; padding: 16px 20px; margin: 24px 0; }
-    .ok { background: var(--ok); color: var(--on-ok); border-radius: 16px; padding: 16px 20px; }
-    .hash { font-family: ui-monospace, monospace; font-size: .85rem; word-break: break-all; }
+    /* Pasos */
+    .pasos { list-style: none; padding: 0; margin: 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; counter-reset: paso; }
+    .pasos li { counter-increment: paso; position: relative; padding-top: 64px; }
+    .pasos li::before {
+      content: counter(paso); position: absolute; top: 20px; left: 24px;
+      width: 36px; height: 36px; border-radius: 50%; display: grid; place-items: center;
+      background: var(--primary); color: var(--primary-ink); font-weight: 900;
+    }
+    .pasos h3 { margin: 0 0 4px; font-size: 1.1rem; }
+    .pasos p { margin: 0; color: var(--muted); }
 
-    footer { color: var(--muted); font-size: .9rem; padding: 24px 0 40px; border-top: 1px solid var(--border); margin-top: 32px; }
+    /* Avisos */
+    .avisos-cab { display: grid; grid-template-columns: 1fr 160px; gap: 24px; align-items: center; }
+    .avisos { display: grid; gap: 12px; }
+    details.aviso {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 18px;
+      overflow: hidden;
+    }
+    details.aviso summary {
+      cursor: pointer; list-style: none; padding: 18px 20px; min-height: 56px;
+      display: grid; grid-template-columns: 32px 1fr 24px; gap: 12px; align-items: center;
+      font-weight: 800;
+    }
+    details.aviso summary::-webkit-details-marker { display: none; }
+    details.aviso summary:focus-visible { outline: 3px solid var(--primary-strong); outline-offset: -3px; }
+    .ico-aviso {
+      width: 32px; height: 32px; border-radius: 10px; display: grid; place-items: center;
+      background: var(--aviso); color: var(--on-aviso); font-weight: 900;
+    }
+    .flecha { transition: transform .2s ease; color: var(--muted); }
+    details[open] .flecha { transform: rotate(180deg); }
+    .aviso-cuerpo { padding: 0 20px 20px 64px; }
+    .pantalla {
+      background: var(--soft); border-left: 4px solid var(--header);
+      border-radius: 12px; padding: 12px 16px; margin: 0 0 12px; font-style: italic;
+    }
+    .pantalla small { display: block; font-style: normal; font-weight: 800; color: var(--muted); font-size: .75rem; text-transform: uppercase; letter-spacing: .05em; }
+    .solucion { margin: 0; padding-left: 1.2em; }
+    .solucion li { margin-bottom: 4px; }
+    .nota-roja { background: var(--error); color: var(--on-error); border-radius: 12px; padding: 10px 14px; margin-top: 10px; font-size: .95rem; }
 
+    .tranquilo {
+      display: flex; gap: 14px; align-items: flex-start;
+      background: var(--ok); color: var(--on-ok); border-radius: 18px; padding: 18px 20px; margin-top: 20px;
+    }
+    .hash { font-family: ui-monospace, monospace; font-size: .82rem; word-break: break-all; }
+    details.experto summary { cursor: pointer; font-weight: 800; }
+
+    /* CTA final y pie */
+    .final { text-align: center; background: linear-gradient(160deg, var(--hero-a), var(--hero-b)); color: #FFFFFF; border-radius: 28px; padding: 40px 24px; }
+    .final h2 { color: #FFFFFF; }
+    .final p { margin: 0 0 22px; opacity: .92; }
+    footer.env { color: var(--muted); font-size: .9rem; padding: 32px 16px 48px; text-align: center; }
+
+    /* Barra de descarga fija en el móvil */
+    .barra-movil {
+      position: fixed; left: 0; right: 0; bottom: 0; z-index: 20;
+      padding: 10px 16px calc(10px + env(safe-area-inset-bottom));
+      background: var(--surface); border-top: 1px solid var(--border);
+      box-shadow: 0 -8px 24px rgb(0 0 0 / .08);
+      display: none; transform: translateY(110%); transition: transform .25s ease;
+    }
+    .barra-movil.visible { transform: none; }
+    .barra-movil .boton { width: 100%; }
+
+    @media (max-width: 900px) {
+      .funciones { grid-template-columns: repeat(2, 1fr); }
+      .estado-grid { grid-template-columns: 1fr; }
+    }
     @media (max-width: 720px) {
-      .portada { grid-template-columns: 1fr; padding-top: 24px; }
-      .mascota { max-width: 220px; order: -1; }
-      .qr { grid-template-columns: 1fr; justify-items: center; text-align: center; }
-      .boton { width: 100%; justify-content: center; }
+      section { padding: 40px 0; }
+      .cab nav { display: none; }
+      .cab .pill-beta { margin-left: auto; }
+      .hero { padding: 28px 0 64px; text-align: center; }
+      .hero .env { grid-template-columns: 1fr; gap: 8px; }
+      .hero .mascota { max-width: 180px; order: -1; }
+      .hero p.lema { margin-left: auto; margin-right: auto; }
+      .chips { justify-content: center; }
+      .hero .boton { width: 100%; }
+      .qr-bloque { display: none; }
+      .pasos { grid-template-columns: 1fr; }
+      .avisos-cab { grid-template-columns: 1fr; }
+      .avisos-cab img { display: none; }
+      .aviso-cuerpo { padding-left: 20px; }
+      .barra-movil { display: block; }
+      footer.env { padding-bottom: 110px; }
+      .funcion { padding: 16px; }
+      .icono { width: 40px; height: 40px; margin-bottom: 8px; }
+      .funcion p { font-size: .92rem; }
+      .pasos { gap: 10px; }
+      .pasos li { padding: 16px 16px 16px 64px; }
+      .pasos li::before { top: 16px; left: 16px; }
+      .estado .card { padding: 20px; }
     }
-    @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+    @media (prefers-reduced-motion: reduce) {
+      html { scroll-behavior: auto; }
+      * { transition: none !important; }
+    }
   </style>
 </head>
 <body>
-  <header>
-    <div class="envoltura">
-      <div class="marca"><img src="logo.png" alt="BlueTalk"></div>
-      <span class="insignia">Beta 0.1.0</span>
+  <header class="cab">
+    <div class="env">
+      <a href="#inicio" aria-label="BlueTalk, inicio"><img class="logo" src="logo.png" alt="BlueTalk"></a>
+      <nav aria-label="Secciones">
+        <a href="#funciones">Qué trae</a>
+        <a href="#instalar">Instalar</a>
+        <a href="#avisos">Avisos</a>
+      </nav>
+      <span class="pill pill-beta">Beta 0.1.0</span>
     </div>
   </header>
 
-  <main class="envoltura">
-    <section class="portada">
-      <div>
-        <h1>Que cada niño <span>tenga su voz</span>.</h1>
-        <p class="lema">BlueTalk es una app de comunicación aumentativa (AAC) para niñas y niños
-          autistas. Funciona sin conexión, sin cuentas y sin anuncios: los datos se quedan en el teléfono.</p>
-        <a class="boton" href="https://github.com/LimitCodev/bluetalk-beta/releases/latest/download/BlueTalk-beta.apk" download>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
-          Descargar APK beta
-        </a>
-        <p class="datos-apk">Android 7.0 o superior · 20 MB · 19/10/2026</p>
+  <main>
+    <div class="hero" id="inicio">
+      <div class="env">
+        <div>
+          <span class="pill pill-pronto">● Pronto en Google Play</span>
+          <h1>Que cada niño <span>tenga su voz</span>.</h1>
+          <p class="lema">Comunicación con pictogramas para niñas y niños autistas.</p>
+          <ul class="chips" aria-label="Características">
+            <li>Sin internet</li><li>Sin cuentas</li><li>Sin anuncios</li>
+          </ul>
+          <a class="boton boton-claro" id="descarga-principal" href="https://github.com/LimitCodev/bluetalk-beta/releases/latest/download/BlueTalk-beta.apk" download>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 3v12m0 0-5-5m5 5 5-5M5 21h14"/></svg>
+            Descargar beta para Android
+          </a>
+          <p class="meta">APK · 20 MB · Android 7.0 o superior · 19/10/2026</p>
+        </div>
+        <img class="mascota" src="mascota.png" width="340" height="340" alt="La mascota de BlueTalk saludando junto a un tablero">
       </div>
-      <img class="mascota" src="mascota.png" alt="La mascota de BlueTalk saludando junto a un tablero">
-    </section>
-
-    <section class="tarjeta qr" aria-labelledby="titulo-qr">
-      <img src="qr.svg" alt="Código QR para descargar BlueTalk">
-      <div>
-        <h2 id="titulo-qr">Escanea con el teléfono</h2>
-        <p>Apunta la cámara al código y abre el enlace. La descarga empieza en la página.</p>
-        <p style="margin-top:8px"><code>https://limitcodev.github.io/bluetalk-beta/</code></p>
-      </div>
-    </section>
-
-    <div class="aviso" role="note">
-      <strong>Versión de prueba.</strong> Esta beta se reparte fuera de Play Store mientras la
-      publicación oficial avanza. Puede tener errores; cuéntanos lo que veas.
     </div>
 
-    <section class="tarjetas" aria-label="Qué trae BlueTalk">
-      <div class="tarjeta"><h3>Comunicador</h3><p>Pictogramas que hablan al tocarlos. El vocabulario nuclear siempre está en el mismo lugar.</p></div>
-      <div class="tarjeta"><h3>Rutinas y Primero–Luego</h3><p>Pasos visuales para anticipar el día y reducir la ansiedad.</p></div>
-      <div class="tarjeta"><h3>Juegos y emociones</h3><p>Actividades tranquilas para aprender jugando, con modo calma.</p></div>
-      <div class="tarjeta"><h3>Modo adulto</h3><p>Panel para la familia o el terapeuta, protegido y separado del modo niño.</p></div>
-    </section>
-
-    <section class="tarjetas">
-      <div class="tarjeta">
-        <h2>Cómo instalar</h2>
-        <ol class="pasos">
-          <li>Descarga el APK con el botón o el código QR.</li>
-          <li>Abre el archivo descargado.</li>
-          <li>Si Android lo pide, permite «instalar apps desconocidas» para tu navegador o gestor de archivos y vuelve atrás.</li>
-          <li>Si Play Protect avisa, toca <strong>Instalar de todas formas</strong> (el texto pequeño), no «Entendido».</li>
-          <li>Espera a «App instalada» y abre BlueTalk.</li>
-        </ol>
+    <div class="env estado">
+      <div class="estado-grid">
+        <div class="card">
+          <h2>Estamos en desarrollo</h2>
+          <p class="sub" style="margin:0">Esta beta es para probar la app antes de su llegada oficial.</p>
+          <ol class="linea">
+            <li><span class="punto p-ok">✓</span><div><b>Beta abierta</b><span>Ya puedes descargarla aquí.</span></div></li>
+            <li><span class="punto p-curso">⏳</span><div><b>Evaluación de Google Play</b><span>En revisión ahora mismo.</span></div></li>
+            <li><span class="punto p-luego">★</span><div><b>Publicación oficial</b><span>Pronto, con actualizaciones automáticas.</span></div></li>
+          </ol>
+        </div>
+        <div class="card play">
+          <div class="play-insignia" role="img" aria-label="Google Play, próximamente">
+            <svg viewBox="0 0 24 24" aria-hidden="true">
+              <path fill="#4285F4" d="M3.6 1.8 13.3 11.9 3.6 22.1c-.3-.3-.5-.7-.5-1.2V3c0-.5.2-.9.5-1.2Z"/>
+              <path fill="#34A853" d="M3.6 1.8c.5-.4 1.2-.4 1.8-.1l11.2 6.4-3.3 3.8Z"/>
+              <path fill="#FBBC04" d="m16.6 8.1 3.6 2.1c1.2.7 1.2 2.7 0 3.4l-3.6 2.1-3.3-3.8Z"/>
+              <path fill="#EA4335" d="m3.6 22.1 9.7-10.2 3.3 3.8-11.2 6.4c-.6.3-1.3.3-1.8 0Z"/>
+            </svg>
+            <span><small>Próximamente en</small><strong>Google Play</strong></span>
+          </div>
+          <p>Cuando esté en la tienda, instalarás BlueTalk sin avisos de seguridad y se actualizará sola.</p>
+        </div>
       </div>
-      <div class="tarjeta">
-        <h2>¿Por qué avisa Android?</h2>
-        <p>Android avisa con <em>cualquier</em> APK que no venga de Play Store, aunque esté firmado.
-          Es normal. Evita enviarlo por WhatsApp: ese chat añade su propio aviso a todo archivo <code>.apk</code>.</p>
-        <div class="ok" style="margin-top:14px">
-          <strong>Comprueba el archivo (SHA-256):</strong>
-          <div class="hash">e96878ae94d4bfb827fe78311f66f1b6abc2392b9cded544540b75fb886fd779</div>
+
+      <div class="card qr qr-bloque">
+        <img src="qr.svg" width="180" height="180" alt="Código QR para abrir esta página en el teléfono">
+        <div>
+          <h2>¿Estás en la computadora?</h2>
+          <p class="sub" style="margin-bottom:8px">Escanea el código con la cámara del teléfono para abrir esta página allí.</p>
+          <code>https://limitcodev.github.io/bluetalk-beta/</code>
+        </div>
+      </div>
+    </div>
+
+    <section id="funciones">
+      <div class="env">
+        <h2>Qué trae BlueTalk</h2>
+        <p class="sub">Todo funciona sin conexión. Los datos se quedan en el teléfono.</p>
+        <div class="funciones">
+          <div class="card funcion">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 12a8 8 0 0 1-11.6 7.1L4 20l1-4.6A8 8 0 1 1 21 12Z"/><path d="M8.5 11h.01M12 11h.01M15.5 11h.01"/></svg></div>
+            <h3>Comunicador</h3><p>Pictogramas que hablan al tocarlos.</p>
+          </div>
+          <div class="card funcion">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="17" rx="3"/><path d="M8 2v4M16 2v4M3 10h18M8 15l2 2 4-4"/></svg></div>
+            <h3>Rutinas</h3><p>Pasos visuales para anticipar el día.</p>
+          </div>
+          <div class="card funcion">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M8.5 14.5a4.5 4.5 0 0 0 7 0M9 9.5h.01M15 9.5h.01"/></svg></div>
+            <h3>Juegos y emociones</h3><p>Actividades tranquilas, con modo calma.</p>
+          </div>
+          <div class="card funcion">
+            <div class="icono"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="11" width="16" height="10" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg></div>
+            <h3>Modo adulto</h3><p>Panel protegido para la familia o terapeuta.</p>
+          </div>
         </div>
       </div>
     </section>
+
+    <section id="instalar" style="padding-top:0">
+      <div class="env">
+        <h2>Instálala en 3 pasos</h2>
+        <p class="sub">Toma menos de un minuto.</p>
+        <ol class="pasos">
+          <li class="card"><h3>Descarga</h3><p>Toca «Descargar beta» en el teléfono.</p></li>
+          <li class="card"><h3>Abre el archivo</h3><p>Búscalo en la barra de notificaciones o en «Descargas».</p></li>
+          <li class="card"><h3>Instala</h3><p>Si aparece un aviso, mira abajo cómo seguir.</p></li>
+        </ol>
+      </div>
+    </section>
+
+    <section id="avisos" style="padding-top:0">
+      <div class="env">
+        <div class="avisos-cab">
+          <div>
+            <h2>¿Te salió un aviso?</h2>
+            <p class="sub">Android avisa con <strong>toda</strong> app que no viene de Google Play, aunque sea segura. Busca el tuyo y sigue los pasos.</p>
+          </div>
+          <img src="mascota-pensando.png" width="160" height="160" alt="">
+        </div>
+
+        <div class="avisos">
+          <details class="aviso">
+            <summary><span class="ico-aviso">1</span>«Este tipo de archivo puede dañar tu dispositivo»<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <p class="pantalla"><small>Lo ves en</small>Chrome, al descargar.</p>
+              <ol class="solucion"><li>Toca <strong>Descargar de todas formas</strong>.</li></ol>
+            </div>
+          </details>
+
+          <details class="aviso">
+            <summary><span class="ico-aviso">2</span>«Tu teléfono no puede instalar apps desconocidas de esta fuente»<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <p class="pantalla"><small>Lo ves en</small>Android, al abrir el archivo por primera vez.</p>
+              <ol class="solucion">
+                <li>Toca <strong>Configuración</strong> o <strong>Ajustes</strong>.</li>
+                <li>Activa <strong>Permitir desde esta fuente</strong>.</li>
+                <li>Vuelve atrás y toca <strong>Instalar</strong>.</li>
+              </ol>
+              <p class="pantalla" style="margin-top:12px"><small>Consejo</small>Al terminar puedes volver a desactivarlo.</p>
+            </div>
+          </details>
+
+          <details class="aviso">
+            <summary><span class="ico-aviso">3</span>Play Protect: «App desconocida» o «desarrollador no reconocido»<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <p class="pantalla"><small>Por qué sale</small>La app aún no está en Google Play, así que Google no la conoce.</p>
+              <ol class="solucion">
+                <li>Toca <strong>Más detalles</strong> (si aparece).</li>
+                <li>Toca <strong>Instalar de todas formas</strong>, el texto pequeño.</li>
+                <li>No toques <strong>Entendido</strong>: cancela la instalación.</li>
+              </ol>
+            </div>
+          </details>
+
+          <details class="aviso">
+            <summary><span class="ico-aviso">4</span>Play Protect: «¿Enviar la app para que se analice?»<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <ol class="solucion"><li>Puedes tocar <strong>Enviar</strong> o <strong>No enviar</strong>. Las dos opciones dejan instalar la app.</li></ol>
+            </div>
+          </details>
+
+          <details class="aviso">
+            <summary><span class="ico-aviso">5</span>Samsung: «Bloqueador automático» impide instalar<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <ol class="solucion">
+                <li>Abre <strong>Ajustes → Seguridad y privacidad → Bloqueador automático</strong>.</li>
+                <li>Desactívalo, instala BlueTalk y vuelve a activarlo.</li>
+              </ol>
+            </div>
+          </details>
+
+          <details class="aviso">
+            <summary><span class="ico-aviso">6</span>Xiaomi / Redmi: análisis de seguridad antes de instalar<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <ol class="solucion">
+                <li>Espera a que termine el análisis.</li>
+                <li>Marca la casilla de aviso si la pide y toca <strong>Instalar</strong> o <strong>Continuar</strong>.</li>
+              </ol>
+            </div>
+          </details>
+
+          <details class="aviso">
+            <summary><span class="ico-aviso">7</span>«App no instalada» o «el paquete no es válido»<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <ol class="solucion">
+                <li>Vuelve a descargar: la descarga pudo quedar incompleta.</li>
+                <li>Revisa que tu Android sea 7.0 o superior.</li>
+                <li>Si ya tenías otra versión de prueba de BlueTalk, desinstálala y vuelve a instalar.</li>
+              </ol>
+              <p class="nota-roja"><strong>Ojo:</strong> desinstalar borra los datos guardados en la app (tableros, fotos, rutinas).</p>
+            </div>
+          </details>
+
+          <details class="aviso">
+            <summary><span class="ico-aviso">8</span>WhatsApp avisa al enviar el archivo<span class="flecha">▾</span></summary>
+            <div class="aviso-cuerpo">
+              <ol class="solucion"><li>WhatsApp avisa con todo archivo <code>.apk</code>. Mejor comparte el enlace de esta página.</li></ol>
+            </div>
+          </details>
+        </div>
+
+        <div class="tranquilo">
+          <span aria-hidden="true" style="font-size:1.4rem">🛡️</span>
+          <div>
+            <strong>Descarga solo desde esta página.</strong> Si alguien te envía un BlueTalk desde otro sitio, no lo instales.
+            <details class="experto" style="margin-top:8px">
+              <summary>Para expertos: huella SHA-256</summary>
+              <div class="hash">e96878ae94d4bfb827fe78311f66f1b6abc2392b9cded544540b75fb886fd779</div>
+            </details>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <div class="env">
+      <div class="final">
+        <h2>Pruébala hoy</h2>
+        <p>Gratis. Comunicar nunca será de pago.</p>
+        <a class="boton boton-claro" href="https://github.com/LimitCodev/bluetalk-beta/releases/latest/download/BlueTalk-beta.apk" download>Descargar beta</a>
+      </div>
+    </div>
   </main>
 
-  <footer class="envoltura">
-    BlueTalk 0.1.0 beta · edición de descarga directa · LimitCodev ·
-    Los permisos opcionales (filtro de páginas y diagnóstico de uso) solo se activan con el consentimiento del adulto.
+  <footer class="env">
+    BlueTalk 0.1.0 · Versión beta en desarrollo · LimitCodev<br>
+    Google Play y el logotipo de Google Play son marcas de Google LLC.
   </footer>
+
+  <div class="barra-movil" id="barra-movil" aria-hidden="true">
+    <a class="boton boton-prim" href="https://github.com/LimitCodev/bluetalk-beta/releases/latest/download/BlueTalk-beta.apk" download tabindex="-1">Descargar beta · 20 MB</a>
+  </div>
+
+  <script>
+    // Barra fija del móvil: aparece cuando el botón principal sale de la pantalla.
+    (function () {
+      var barra = document.getElementById('barra-movil');
+      var boton = document.getElementById('descarga-principal');
+      if (!('IntersectionObserver' in window) || !barra || !boton) return;
+      new IntersectionObserver(function (e) {
+        barra.classList.toggle('visible', !e[0].isIntersecting);
+      }).observe(boton);
+    })();
+  </script>
 </body>
 </html>
