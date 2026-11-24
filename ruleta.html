@@ -61,7 +61,7 @@
       filter: drop-shadow(0 22px 40px rgb(0 0 0 / .3));
       transition: transform 5.2s cubic-bezier(.12, .7, .1, 1);
     }
-    .rueda text { font-family: "Nunito", system-ui, sans-serif; font-weight: 900; font-size: 19px; }
+    .rueda text { font-family: "Nunito", system-ui, sans-serif; font-weight: 900; font-size: 18px; }
     .puntero {
       position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
       width: 13%; filter: drop-shadow(0 6px 8px rgb(0 0 0 / .3)); z-index: 2;
@@ -149,8 +149,8 @@
       <button class="girar" id="girar" type="button">¡Girar la ruleta!</button>
 
       <div class="resultado" id="resultado" hidden aria-live="polite">
-        <img src="mascota-premio.png" width="120" height="130" alt="">
-        <div><small>¡Te tocó!</small><strong id="premio"></strong></div>
+        <img id="mascota-resultado" src="mascota-premio.png" width="120" height="130" alt="">
+        <div><small id="titulo-resultado">¡Te tocó!</small><strong id="premio"></strong></div>
       </div>
 
       <ul class="lista" id="lista" aria-label="Premios"></ul>
@@ -159,13 +159,17 @@
 
   <script>
     // Premios: edita solo esta lista (el orden es el de la rueda, en sentido horario).
-    var PREMIOS = ['Premio 1', 'Premio 2', 'Premio 3', 'Premio 4', 'Premio 5',
-                   'Premio 6', 'Premio 7', 'Premio 8', 'Premio 9', 'Premio 10'];
-    // Relleno y texto de cada casilla (contraste AA del texto sobre su fondo).
-    var COLORES = [
-      ['#1574C1', '#FFFFFF'], ['#37BEA7', '#0A3B2E'], ['#0F5E9C', '#FFFFFF'], ['#BFF3E8', '#0F5E9C'],
-      ['#238EE7', '#061A2E'], ['#FBEBC8', '#5B4413'], ['#1574C1', '#FFFFFF'], ['#37BEA7', '#0A3B2E'],
-      ['#0F5E9C', '#FFFFFF'], ['#BFF3E8', '#0F5E9C']
+    //   rueda: texto en la casilla (\n parte la línea) · nombre: texto del resultado
+    //   color: [relleno, texto] con contraste AA · nada: casilla sin premio
+    var PREMIOS = [
+      { rueda: 'Pines', color: ['#1574C1', '#FFFFFF'] },
+      { rueda: 'Suerte la\npróxima', nada: true, color: ['#E8F2FB', '#0F5E9C'] },
+      { rueda: 'Lapiceros', color: ['#37BEA7', '#0A3B2E'] },
+      { rueda: 'Suerte la\npróxima', nada: true, color: ['#E8F2FB', '#0F5E9C'] },
+      { rueda: 'Stickers', color: ['#0F5E9C', '#FFFFFF'] },
+      { rueda: 'Curso', color: ['#238EE7', '#061A2E'] },
+      { rueda: 'Suerte la\npróxima', nada: true, color: ['#E8F2FB', '#0F5E9C'] },
+      { rueda: 'Beca\n50%', nombre: 'Beca 50% · Innovación que da voz', color: ['#FBEBC8', '#5B4413'] }
     ];
     var VUELTAS = 6;
 
@@ -189,8 +193,8 @@
     function dibujar() {
       var ns = 'http://www.w3.org/2000/svg', html = '';
       html += '<circle cx="200" cy="200" r="198" fill="#FFFFFF"/>';
-      PREMIOS.forEach(function (nombre, i) {
-        var col = COLORES[i % COLORES.length], a = i * PASO, medio = a + PASO / 2;
+      PREMIOS.forEach(function (p, i) {
+        var col = p.color, a = i * PASO, medio = a + PASO / 2;
         html += '<path d="M200 200L' + punto(a, R) + 'A' + R + ' ' + R + ' 0 0 1 ' + punto(a + PASO, R) +
                 'Z" fill="' + col[0] + '" stroke="#FFFFFF" stroke-width="2"/>';
         html += '<text x="' + (C + R * 0.6) + '" y="' + C + '" fill="' + col[1] +
@@ -203,13 +207,27 @@
       }
       rueda.innerHTML = html;
       // textContent: los nombres de premio nunca se interpretan como HTML.
-      rueda.querySelectorAll('text').forEach(function (t, i) { t.textContent = PREMIOS[i]; });
-      PREMIOS.forEach(function (nombre) {
+      rueda.querySelectorAll('text').forEach(function (t, i) {
+        var lineas = PREMIOS[i].rueda.split('\n');
+        lineas.forEach(function (linea, j) {
+          var ts = document.createElementNS(ns, 'tspan');
+          ts.setAttribute('x', C + R * 0.6);
+          ts.setAttribute('dy', (j ? 1.1 : -(lineas.length - 1) * 0.55) + 'em');
+          ts.textContent = linea;
+          t.appendChild(ts);
+        });
+      });
+      // La lista muestra solo los premios reales, sin repetir «Suerte la próxima».
+      PREMIOS.forEach(function (p, i) {
+        if (p.nada) return;
         var li = document.createElement('li');
-        li.textContent = nombre;
+        li.dataset.i = i;
+        li.textContent = nombreDe(p);
         lista.appendChild(li);
       });
     }
+
+    function nombreDe(p) { return p.nombre || p.rueda.replace('\n', ' '); }
 
     function azar(max) {
       var u = new Uint32Array(1);
@@ -236,8 +254,11 @@
         if (hecho) return;
         hecho = true;
         var i = casillaBajoPuntero(giro);
-        document.getElementById('premio').textContent = PREMIOS[i];
-        lista.children[i].classList.add('ganador');
+        var p = PREMIOS[i], chip = lista.querySelector('[data-i="' + i + '"]');
+        document.getElementById('premio').textContent = nombreDe(p);
+        document.getElementById('titulo-resultado').textContent = p.nada ? '¡Casi!' : '¡Te tocó!';
+        document.getElementById('mascota-resultado').src = p.nada ? 'mascota-pensando.png' : 'mascota-premio.png';
+        if (chip) chip.classList.add('ganador');
         caja.hidden = false;
         caja.classList.remove('nuevo'); void caja.offsetWidth; caja.classList.add('nuevo');
         ruleta.classList.remove('girando');
